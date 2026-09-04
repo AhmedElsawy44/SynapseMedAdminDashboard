@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, BookOpen, RefreshCw, ClipboardCheck,
   Lock, Tag, Award, Bell, BarChart2, Shield, Settings,
   Search, ChevronRight, ChevronDown, ChevronLeft,
-  Menu, X, User, LogOut, Key, Monitor,
+  Menu, X, User, LogOut, Key, Monitor, Smartphone,
   SlidersHorizontal, ArrowUpDown, ArrowUp, ArrowDown,
   MoreHorizontal, Eye, AlertCircle, Clock,
   Plus, FileText, Send, ExternalLink,
@@ -835,16 +835,44 @@ function StudentDetailsPage({ student, onBack }: { student: typeof ALL_STUDENTS[
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
           {/* Identity */}
-          <SectionCard title="Identity">
-            <FieldRow label="Full Name"   value={student.name}     />
-            <FieldRow label="Email"       value={student.email}    />
-            <FieldRow label="Student ID"  value={student.id}       />
-            <FieldRow label="Status"      />
+          <SectionCard title="Identity & Academic Info">
+            <FieldRow label="Full Name"     value={student.name}     />
+            <FieldRow label="Email"         value={student.email}    />
+            <FieldRow label="Phone"         value="+20 101 458 9921" />
+            <FieldRow label="University"    value="Faculty of Medicine (Kasr Al-Ainy)" />
+            <FieldRow label="Academic Year" value="Year 4 - Clinical" />
+            <FieldRow label="Student ID"    value={student.id}       />
             <div style={{ padding: "12px 20px" }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(169,181,199,0.45)", letterSpacing: "0.08em", display: "block", marginBottom: 6 }}>STATUS</span>
               <StatusBadge status={student.status} />
             </div>
-            <FieldRow label="Enrolled"    value={student.enrolled} />
+            <FieldRow label="Enrolled"      value={student.enrolled} />
+          </SectionCard>
+
+          {/* Active Hardware Sessions (3-Device Concurrency Backend Policy) */}
+          <SectionCard title="Active Devices (2 / 3 Limit)">
+            <div style={{ padding: "14px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Monitor size={15} style={{ color: C.cyan }} />
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Chrome on Windows</div>
+                    <div style={{ fontSize: 10, color: C.muted }}>Cairo, Egypt • Active Now</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 10, color: "#4ade80", background: "rgba(74,222,128,0.1)", padding: "2px 6px", borderRadius: 4, fontWeight: 700 }}>CURRENT</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `1px solid ${C.border}`, paddingTop: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Smartphone size={15} style={{ color: C.muted }} />
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>Synapse Med iOS App</div>
+                    <div style={{ fontSize: 10, color: C.muted }}>iPhone 15 • 2 hrs ago</div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 10, color: C.muted }}>Device 2/3</span>
+              </div>
+            </div>
           </SectionCard>
 
           {/* Access */}
@@ -3229,11 +3257,13 @@ function QuizEditorPage({ quizIndex, onBack }: { quizIndex: number; onBack: () =
   const row = QUIZ_ROWS_DATA[quizIndex % QUIZ_ROWS_DATA.length];
   const [passingScore, setPassingScore] = useState(String(row.passingScore));
   const [maxAttempts, setMaxAttempts]   = useState(String(row.maxAttempts));
+  const [timeLimit, setTimeLimit]       = useState("45");
   const [questions, setQuestions]       = useState<QuizQ[]>(makeInitialQuestions);
   const [saveState, setSaveState]       = useState<SaveState>("idle");
   const [isDirty, setIsDirty]           = useState(false);
   const [psFocused, setPsFocused]       = useState(false);
   const [maFocused, setMaFocused]       = useState(false);
+  const [tlFocused, setTlFocused]       = useState(false);
   const [psError, setPsError]           = useState("");
   const [maError, setMaError]           = useState("");
 
@@ -3327,6 +3357,19 @@ function QuizEditorPage({ quizIndex, onBack }: { quizIndex: number; onBack: () =
                   style={{ width: "100%", height: 42, background: C.elevated, border: `1px solid ${maError ? "#e05555" : maFocused ? `${C.cyan}55` : C.border}`, borderRadius: 8, paddingInline: 12, fontSize: 14, color: C.text, outline: "none", fontFamily: "'Montserrat',sans-serif", boxSizing: "border-box" }} />
                 {maError && <span style={{ fontSize: 11, color: "#e05555" }}>{maError}</span>}
                 {!maError && <span style={{ fontSize: 11, color: "rgba(169,181,199,0.4)" }}>Total allowed attempts</span>}
+              </div>
+              <div style={{ flex: "1 1 160px", display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: "0.06em" }}>
+                  TIME LIMIT (MINUTES) <span style={{ color: C.cyan }}>*</span>
+                </label>
+                <div style={{ position: "relative" }}>
+                  <input value={timeLimit} onChange={(e) => { setTimeLimit(e.target.value); markDirty(); }}
+                    onFocus={() => setTlFocused(true)} onBlur={() => setTlFocused(false)}
+                    type="number" min={1} placeholder="e.g. 45"
+                    style={{ width: "100%", height: 42, background: C.elevated, border: `1px solid ${tlFocused ? `${C.cyan}55` : C.border}`, borderRadius: 8, paddingInline: "12px 36px", fontSize: 14, color: C.text, outline: "none", fontFamily: "'Montserrat',sans-serif", boxSizing: "border-box" }} />
+                  <span style={{ position: "absolute", insetInlineEnd: 12, top: "50%", transform: "translateY(-50%)", fontSize: 12, color: C.muted }}>min</span>
+                </div>
+                <span style={{ fontSize: 11, color: "rgba(169,181,199,0.4)" }}>Duration allowed per attempt</span>
               </div>
             </div>
           </div>
@@ -3757,6 +3800,7 @@ function AccessPage({ rows, onRevoke, onView, onGrant }: {
   const typeDropRef   = useRef<HTMLDivElement>(null);
   const courseDropRef = useRef<HTMLDivElement>(null);
   const [pendingRevoke, setPendingRevoke] = useState<AccessRecord | null>(null);
+  const [revokeReason, setRevokeReason]   = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 10;
 
@@ -3806,14 +3850,56 @@ function AccessPage({ rows, onRevoke, onView, onGrant }: {
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "28px 32px 40px", background: C.bg }}>
       {pendingRevoke && (
-        <ConfirmationModal
-          title="Revoke Access?"
-          body={`You are about to revoke access for:\n\n${pendingRevoke.studentName}\n\nTarget: ${pendingRevoke.target}\n\nThe student will immediately lose access to this content.`}
-          confirmLabel="Revoke Access"
-          danger
-          onConfirm={() => { onRevoke(pendingRevoke.id); setPendingRevoke(null); }}
-          onCancel={() => setPendingRevoke(null)}
-        />
+        <div style={{ position: "fixed", inset: 0, background: "rgba(7,18,37,0.85)", backdropFilter: "blur(6px)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: C.surface, border: "1px solid rgba(248,113,113,0.3)", borderRadius: 14, width: "100%", maxWidth: 480, overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,0.5)" }}>
+            <div style={{ padding: "20px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AlertCircle size={20} style={{ color: "#f87171" }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>Revoke Access</div>
+                <div style={{ fontSize: 12, color: C.muted }}>Audit compliance requires an explicit reason.</div>
+              </div>
+            </div>
+            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 8, padding: 12, fontSize: 13, color: "#fca5a5" }}>
+                You are about to revoke access for <strong>{pendingRevoke.studentName}</strong> to <strong>{pendingRevoke.target}</strong>. The student will immediately lose access.
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>
+                  Reason for Revocation <span style={{ color: "#f87171" }}>*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={revokeReason}
+                  onChange={(e) => setRevokeReason(e.target.value)}
+                  placeholder="E.g., Payment dispute, course completion expired, or student request."
+                  style={{ width: "100%", background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 12px", fontSize: 13, color: C.text, outline: "none", resize: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, padding: "16px 24px", borderTop: `1px solid ${C.border}`, background: C.surface }}>
+              <button
+                onClick={() => { setPendingRevoke(null); setRevokeReason(""); }}
+                style={{ padding: "8px 18px", borderRadius: 8, border: `1px solid ${C.border}`, background: "transparent", color: C.muted, fontSize: 13, cursor: "pointer" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!revokeReason.trim()) return;
+                  onRevoke(pendingRevoke.id);
+                  setPendingRevoke(null);
+                  setRevokeReason("");
+                }}
+                disabled={!revokeReason.trim()}
+                style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: "#f87171", color: "#ffffff", fontSize: 13, fontWeight: 700, cursor: !revokeReason.trim() ? "default" : "pointer", opacity: !revokeReason.trim() ? 0.5 : 1 }}
+              >
+                Confirm Revocation
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Header */}
@@ -4396,6 +4482,9 @@ import CouponEditorPage from "./CouponEditorPage";
 import CouponRedemptionsPage from "./CouponRedemptionsPage";
 import AnalyticsPage from "./AnalyticsPage";
 import { NotificationsListPage, NotificationDetailsPage, NotificationComposerPage } from "./NotificationsPage";
+import CertificatesPage from "./CertificatesPage";
+import AuditLogsPage from "./AuditLogsPage";
+import SettingsPage from "./SettingsPage";
 
 export default function App() {
   const [collapsed, setCollapsed]           = useState(false);
@@ -4633,6 +4722,15 @@ export default function App() {
 
     if (active === "Analytics") {
       return <AnalyticsPage />;
+    }
+    if (active === "Certificates") {
+      return <CertificatesPage />;
+    }
+    if (active === "Audit Logs") {
+      return <AuditLogsPage />;
+    }
+    if (active === "Settings") {
+      return <SettingsPage />;
     }
     return <OverviewPage />;
   }
