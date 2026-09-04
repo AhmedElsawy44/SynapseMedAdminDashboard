@@ -1,0 +1,495 @@
+SYNAPSE MED — ADMIN UI
+PROMPT #08 — REVISIONS LIST
+
+Design the Revisions List page for the SYNAPSE MED Admin Console.
+
+The approved SYNAPSE MED Admin App Shell is immutable.
+
+Reuse the existing SYNAPSE MED Design System.
+
+==================================================
+1. PRODUCT PURPOSE
+==================================================
+
+The Revisions page manages Course Revision records.
+
+A Revision represents a version/state of educational content associated
+with a Course.
+
+This page is lifecycle-driven.
+
+The administrator needs to understand:
+
+- which revisions exist
+- which Course they belong to
+- their lifecycle state
+- their availability window
+- what action is currently possible
+
+==================================================
+2. REVISION LIFECYCLE
+==================================================
+
+The Revision lifecycle is:
+
+Draft
+↓
+Scheduled
+↓
+Active
+↓
+Inactive
+↓
+Archived
+
+These are the approved Revision states.
+
+DO NOT invent additional lifecycle states.
+
+Do not use Course statuses here.
+
+==================================================
+3. PAGE HEADER
+==================================================
+
+Breadcrumb:
+
+Admin / Revisions
+
+Title:
+
+Revisions
+
+Description:
+
+Use concise operational copy.
+
+If revision creation is supported:
+
+Primary action:
+
+Create Revision
+
+Do not add unsupported actions.
+
+==================================================
+4. SEARCH
+==================================================
+
+Search should allow administrators to locate revisions using
+supported revision information.
+
+The platform search model supports Revision title.
+
+Use:
+
+Search revisions...
+
+Do not invent additional searchable fields.
+
+==================================================
+5. FILTERS
+==================================================
+
+Create filters based on the Revision lifecycle.
+
+Primary filter:
+
+Status
+
+Values:
+
+Draft
+
+Scheduled
+
+Active
+
+Inactive
+
+Archived
+
+Additional filters may only be added if supported by the product model.
+
+Do not invent:
+
+Instructor
+
+Department
+
+Revenue
+
+Performance
+
+Rating
+
+==================================================
+6. LIFECYCLE VISUALIZATION
+==================================================
+
+Status must be visually clear.
+
+Use the existing status badge system.
+
+Each status should have a restrained semantic treatment.
+
+Do not use five completely unrelated bright colors.
+
+The visual language should remain calm.
+
+==================================================
+7. AVAILABILITY
+==================================================
+
+Revision availability is represented by:
+
+available_from
+
+available_until
+
+Show these dates when supported.
+
+Use a readable date/time format.
+
+The UI should make the availability window understandable.
+
+Do not expose database field names.
+
+==================================================
+8. REVISION TABLE
+==================================================
+
+Use the approved DataTable system.
+
+Conceptual columns:
+
+Revision
+
+Course
+
+Status
+
+Available From
+
+Available Until
+
+Actions
+
+Only show fields supported by the actual data model.
+
+Do not invent additional metrics.
+
+==================================================
+9. REVISION IDENTITY
+==================================================
+
+Show:
+
+Revision title/name
+
+Optional approved secondary information
+
+The Revision should remain visually connected to its parent Course.
+
+==================================================
+10. COURSE RELATIONSHIP
+==================================================
+
+Every Revision is associated with a Course.
+
+The UI should make this relationship clear.
+
+Use:
+
+Course name
+
+as secondary information.
+
+Do not duplicate the entire Course object.
+
+==================================================
+11. DATE DISPLAY
+==================================================
+
+Dates should be readable.
+
+If a revision is:
+
+Draft:
+
+Availability may be absent.
+
+Scheduled:
+
+Future availability should be clearly visible.
+
+Active:
+
+Current availability should be clear.
+
+Inactive:
+
+The previous availability window may remain visible if supported.
+
+Archived:
+
+Use subdued presentation.
+
+Do not create custom lifecycle logic beyond the defined model.
+
+==================================================
+12. ROW ACTIONS
+==================================================
+
+Actions must respect lifecycle.
+
+Only show actions explicitly supported.
+
+Potential actions may include:
+
+View
+
+Edit
+
+Activate
+
+Schedule
+
+Archive
+
+BUT:
+
+These actions must only appear if supported by the actual workflow.
+
+Do not assume every status allows every action.
+
+Do not invent transition buttons.
+
+==================================================
+13. LIFECYCLE ACTION UX
+==================================================
+
+If a lifecycle transition is available:
+
+The action should clearly communicate the transition.
+
+Example:
+
+Schedule Revision
+
+Activate Revision
+
+Archive Revision
+
+Use confirmation when the transition is consequential.
+
+Do not use generic:
+
+"Change Status"
+
+when a specific action is clearer.
+
+==================================================
+14. STATUS TRANSITION SAFETY
+==================================================
+
+Never allow the UI to imply an invalid lifecycle transition.
+
+The UI should follow:
+
+Draft
+→ Scheduled
+→ Active
+→ Inactive
+→ Archived
+
+Do not visually expose impossible transitions.
+
+Do not allow Archived to appear editable like Draft.
+
+==================================================
+15. EMPTY STATE
+==================================================
+
+No revisions:
+
+No revisions yet.
+
+If creation is supported:
+
+[ Create Revision ]
+
+Filtered empty:
+
+No revisions match your current filters.
+
+[ Clear Filters ]
+
+==================================================
+16. LOADING
+==================================================
+
+Use table skeleton loading.
+
+Include skeletons for:
+
+Revision
+
+Course
+
+Status
+
+Dates
+
+Actions
+
+==================================================
+17. ERROR
+==================================================
+
+Unable to load revisions.
+
+[ Try Again ]
+
+Do not expose technical errors.
+
+==================================================
+18. RESPONSIVE
+==================================================
+
+Desktop:
+
+Full table.
+
+Tablet:
+
+Readable table with horizontal scrolling if necessary.
+
+Mobile:
+
+Use a revision list representation.
+
+Each revision item should show:
+
+Revision title
+
+Course
+
+Status
+
+Availability
+
+Primary action
+
+Do not compress five columns into unreadable mobile cells.
+
+==================================================
+19. RTL
+==================================================
+
+Support Arabic RTL.
+
+Dates remain readable.
+
+Directional icons mirror correctly.
+
+Status badges remain correctly positioned.
+
+==================================================
+20. VISUAL IDENTITY
+==================================================
+
+Maintain the SYNAPSE MED system:
+
+Deep Navy
+
+White
+
+Controlled Cyan
+
+Muted text
+
+Subtle semantic states
+
+Dark surfaces
+
+Minimal borders
+
+Minimal shadows
+
+No excessive gradients.
+
+No glassmorphism.
+
+No neon.
+
+==================================================
+21. DATA INTEGRITY
+==================================================
+
+Never invent:
+
+- revision names
+- course names
+- dates
+- statuses
+- lifecycle transitions
+- metrics
+- actions
+
+If data is unavailable:
+
+Use —
+
+If no records exist:
+
+Use the empty state.
+
+==================================================
+22. OUTPUT
+==================================================
+
+Create one high-fidelity desktop Revisions List screen.
+
+Show:
+
+- Approved App Shell
+- Page Header
+- Search
+- Status filter
+- Revisions table
+- Lifecycle badges
+- Availability information
+- Contextual actions
+- Pagination
+- Empty/loading/error behavior
+
+Do not create Revision Details in this prompt.
+
+Do not create Revision Editor in this prompt.
+
+==================================================
+23. FINAL QUALITY BAR
+==================================================
+
+This page should feel like:
+
+A controlled content lifecycle management interface.
+
+The administrator should immediately understand:
+
+WHAT revision exists
+
+WHICH course it belongs to
+
+WHAT STATE it is in
+
+WHEN it becomes available
+
+WHAT ACTION is currently possible
+
+The lifecycle is the primary UX concept.
+
+Do not hide it.
+
+Do not invent additional product behavior.

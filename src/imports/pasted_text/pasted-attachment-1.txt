@@ -1,0 +1,837 @@
+# SYNAPSE MED — ADMIN UI
+
+## Prompt #04 — Student Details
+
+Design the Student Details page for the SYNAPSE MED Admin Console.
+
+The previously approved SYNAPSE MED Admin App Shell is immutable.
+
+Reuse exactly the approved:
+
+* Sidebar
+* Topbar
+* Global Search
+* Notification system
+* Admin profile
+* Typography
+* Color system
+* Surface system
+* Button system
+* Card system
+* Table system
+* Status system
+* Spacing system
+* Icon system
+
+Do NOT redesign the App Shell.
+
+---
+
+# 1. PRODUCT PURPOSE
+
+This page allows an authorized administrator to inspect a single student's information and learning-related state.
+
+The page should provide a clear administrative overview without becoming an overloaded "everything page".
+
+The information should be organized into logical sections.
+
+The page must prioritize:
+
+* identity
+* access
+* learning progress
+* quiz performance
+* certificates
+
+Only show information that exists in the actual product specification/data model.
+
+---
+
+# 2. CRITICAL PRODUCT RULE
+
+The architecture defines separate domains for:
+
+Identity
+Learning
+Quiz
+Access
+Certificates
+
+Therefore the UI may organize the student information around these domains.
+
+However:
+
+DO NOT invent fields that are not defined.
+
+The UI determines presentation.
+
+The product data model determines what information exists.
+
+---
+
+# 3. PAGE HEADER
+
+Use:
+
+Breadcrumb:
+
+Admin / Students / Student
+
+Page title:
+
+Student Details
+
+The header should include the student's primary identity if available.
+
+Example structure:
+
+Student Name
+
+Secondary student identifier
+
+Status
+
+Do not invent a student ID if the product specification does not define one.
+
+---
+
+# 4. BACK NAVIGATION
+
+Provide a clear navigation mechanism:
+
+Back to Students
+
+Use the existing secondary-button/link style.
+
+Do not create a large decorative back button.
+
+---
+
+# 5. STUDENT PROFILE HEADER
+
+Create a compact profile header.
+
+Structure:
+
+Avatar
+
+Student name
+
+Primary identity information
+
+Status
+
+Optional metadata
+
+Actions
+
+The profile header should feel like an information header, not a social-media profile.
+
+Do not add:
+
+* social links
+* followers
+* profile statistics
+* unrelated personal information
+
+---
+
+# 6. ACTIONS
+
+Only show actions explicitly supported by the product workflow.
+
+Do NOT automatically add:
+
+* Delete Student
+* Suspend Student
+* Reset Password
+* Impersonate
+* Send Email
+* Export Student
+* Change Role
+
+unless those actions are explicitly supported.
+
+If no student-management action is defined:
+
+The header may contain only:
+
+Back
+
+and
+
+non-destructive navigation.
+
+Do not invent an action simply to fill the header.
+
+---
+
+# 7. INFORMATION ARCHITECTURE
+
+Organize the page into:
+
+## Section A — Identity
+
+Student's approved identity/account information.
+
+## Section B — Access
+
+Current approved access grants.
+
+## Section C — Learning Progress
+
+Course/lecture progress information supported by the Learning domain.
+
+## Section D — Quiz Activity
+
+Approved quiz attempts/results.
+
+## Section E — Certificates
+
+Certificates generated for completed courses, if applicable.
+
+These sections may be presented as tabs or stacked sections depending on available screen width.
+
+The desktop version should prioritize fast scanning.
+
+---
+
+# 8. IDENTITY SECTION
+
+Show only approved identity fields.
+
+Possible conceptual information:
+
+* Name
+* Email
+* Account status
+* Account-related dates
+
+BUT:
+
+Do not assume every field exists.
+
+Do not add:
+
+* phone
+* address
+* date of birth
+* gender
+* university
+* specialty
+
+unless explicitly defined by the actual data model.
+
+---
+
+# 9. ACCESS SECTION
+
+The Access domain is central to the platform.
+
+In the MVP, student access is obtained through Coupon Redemption.
+
+The Access model can relate a student to:
+
+* Course
+* Revision
+
+Therefore represent access as a clear data structure.
+
+Possible structure:
+
+Resource
+
+Type
+
+Access status
+
+Relevant availability information
+
+Only show fields actually supported.
+
+Do not invent payment information.
+
+Do not show "Purchased" if the MVP does not have payments.
+
+Do not show "Subscription" unless supported.
+
+---
+
+# 10. ACCESS STATUS
+
+Use compact semantic status badges.
+
+The status must communicate the actual access state.
+
+Do not invent additional access states.
+
+If access has a time window:
+
+Show it clearly.
+
+Do not use vague wording such as:
+
+"Almost expired"
+
+unless that state is actually defined.
+
+---
+
+# 11. LEARNING PROGRESS
+
+The Learning domain includes:
+
+Progress
+
+Completion
+
+Unlocking
+
+Therefore the UI should represent learning state in a structured way.
+
+Preferred pattern:
+
+Course
+
+Progress
+
+Completed lectures / approved completion information
+
+Current learning state
+
+Use a progress bar only if an actual progress value exists.
+
+Do not invent percentages.
+
+Do not display:
+
+92%
+
+67%
+
+43%
+
+unless supplied by the product data.
+
+---
+
+# 12. COURSE PROGRESS
+
+If the student has access to multiple courses:
+
+Use a compact course-progress list/table.
+
+Each item may include only approved fields such as:
+
+Course
+
+Progress
+
+Completion
+
+Current state
+
+The layout should make it easy to scan multiple courses.
+
+Avoid large cards for every course.
+
+Do not create "course analytics" that do not exist.
+
+---
+
+# 13. QUIZ ACTIVITY
+
+The Quiz domain contains:
+
+Quizzes
+
+Questions
+
+Attempts
+
+Scoring
+
+The Student Details page may show quiz activity in a compact table.
+
+Possible conceptual columns:
+
+Quiz
+
+Attempt
+
+Score
+
+Result
+
+Date
+
+BUT:
+
+Only render fields explicitly supported by the actual quiz data.
+
+The Quiz engine is intentionally simple:
+
+* Multiple Answer
+* True/False
+* Passing Score
+* Max Attempts
+
+Do not introduce:
+
+* percentile
+* ranking
+* difficulty analysis
+* question analytics
+* AI-generated insights
+
+---
+
+# 14. QUIZ RESULT
+
+Use a restrained result/status badge.
+
+Examples only if supported:
+
+Passed
+
+Failed
+
+Do not introduce additional states.
+
+Do not use large colored blocks.
+
+The score should remain visually secondary to the student's overall profile.
+
+---
+
+# 15. CERTIFICATES
+
+The Certificate domain represents certificates generated after course completion.
+
+Show a compact certificate list if certificates exist.
+
+Possible conceptual structure:
+
+Certificate
+
+Course
+
+Issued date
+
+Status
+
+View / Open action
+
+Only use actual supported fields.
+
+Do not invent:
+
+* certificate verification score
+* certificate ranking
+* certificate expiry
+
+unless explicitly defined.
+
+---
+
+# 16. CERTIFICATE ACTION
+
+If a certificate file exists:
+
+Provide an appropriate view/open action.
+
+The actual certificate file is stored separately from database metadata according to the architecture.
+
+The UI should treat the certificate as a document/resource.
+
+Do not embed an enormous certificate preview into the Student Details page.
+
+---
+
+# 17. NOTIFICATIONS
+
+Do NOT make Notifications a major Student Details section unless the product specification explicitly requires student-specific notification history here.
+
+The platform has a separate Notifications domain.
+
+Do not duplicate the entire Notifications module inside Student Details.
+
+If notification history is later required:
+
+It should be a dedicated interaction/section.
+
+---
+
+# 18. AUDIT LOGS
+
+Do NOT show Admin Audit Logs as if they were student activity.
+
+Audit logging tracks administrative actions such as:
+
+Published Course
+
+Unpublished Course
+
+Archived Course
+
+Created Coupon
+
+Activated Revision
+
+It is an administrative accountability system.
+
+Do not mix it with the student's learning history.
+
+---
+
+# 19. PAGE LAYOUT
+
+Desktop:
+
+Use a two-level hierarchy.
+
+Top:
+
+Student profile header.
+
+Below:
+
+Primary content area.
+
+Recommended layout:
+
+Left/main:
+
+Learning Progress
+
+Quiz Activity
+
+Certificates
+
+Right/secondary:
+
+Identity
+
+Access Summary
+
+The right column must remain compact.
+
+If the data is too large:
+
+Use full-width sections instead of squeezing content.
+
+---
+
+# 20. CARD USAGE
+
+Do not create a card for every individual piece of information.
+
+Avoid:
+
+Card inside card inside card.
+
+Use cards as meaningful content surfaces.
+
+Preferred:
+
+Profile surface
+
+Access surface
+
+Learning surface
+
+Quiz surface
+
+Certificate surface
+
+Do not use decorative cards merely to create visual density.
+
+---
+
+# 21. TABS
+
+Tabs may be used if they improve information architecture.
+
+Possible tabs:
+
+Overview
+
+Learning
+
+Quizzes
+
+Certificates
+
+BUT:
+
+Do not create tabs that contain only one small field.
+
+Do not create:
+
+Notifications
+
+Audit
+
+Payments
+
+Analytics
+
+unless explicitly required.
+
+If stacked sections provide better scanning:
+
+Prefer stacked sections over unnecessary tabs.
+
+---
+
+# 22. EMPTY STATES
+
+Each domain section needs a meaningful empty state.
+
+Examples:
+
+No active access
+
+No learning activity
+
+No quiz attempts
+
+No certificates
+
+Keep empty states compact.
+
+Do not use large illustrations.
+
+Do not make an empty section visually dominate the page.
+
+---
+
+# 23. LOADING STATE
+
+Use section-level skeleton loading.
+
+Profile:
+
+avatar + text skeleton
+
+Access:
+
+row skeletons
+
+Learning:
+
+progress skeletons
+
+Quiz:
+
+table skeleton
+
+Certificates:
+
+row skeleton
+
+Do not block the whole page with a single spinner.
+
+---
+
+# 24. ERROR STATE
+
+A failure in one section must not destroy the entire page.
+
+Example:
+
+Unable to load learning progress.
+
+[ Try Again ]
+
+Other sections should remain available when possible.
+
+Never expose:
+
+API errors
+
+database errors
+
+stack traces
+
+internal IDs
+
+---
+
+# 25. DATA INTEGRITY
+
+ABSOLUTE RULE:
+
+Never invent student information.
+
+Never invent:
+
+* names
+* emails
+* percentages
+* scores
+* access dates
+* certificates
+* course enrollments
+* quiz attempts
+* statuses
+
+If a value is unknown:
+
+Use:
+
+—
+
+If a dataset is unavailable:
+
+Show an intentional empty/loading state.
+
+---
+
+# 26. PRIVACY
+
+Do not expose sensitive information unnecessarily.
+
+Never display:
+
+* passwords
+* authentication tokens
+* session secrets
+* private API credentials
+
+The architecture explicitly excludes passwords, tokens, and sensitive secrets from audit records and operational exposure.
+
+---
+
+# 27. VISUAL SYSTEM
+
+Maintain the approved SYNAPSE MED visual language:
+
+Deep Navy
+
+White
+
+Controlled Cyan
+
+Subtle semantic colors
+
+Dark elevated surfaces
+
+Subtle borders
+
+Clean modern typography
+
+Minimal shadows
+
+No excessive gradients.
+
+No excessive glow.
+
+No glassmorphism.
+
+No medical clipart.
+
+---
+
+# 28. INFORMATION DENSITY
+
+This is an administrative detail page.
+
+It should contain useful information.
+
+But:
+
+Do not create a wall of data.
+
+Use:
+
+* clear headings
+* whitespace
+* compact metadata
+* tables where appropriate
+* progressive disclosure
+
+The administrator should understand the student's state quickly.
+
+---
+
+# 29. RESPONSIVE
+
+Desktop:
+
+Two-column information hierarchy where appropriate.
+
+Tablet:
+
+Collapse into one main column.
+
+Mobile:
+
+Profile header becomes compact.
+
+Sections stack.
+
+Tables transform intentionally.
+
+Do not shrink tables into unreadable columns.
+
+Tabs may become horizontal scrolling if used.
+
+---
+
+# 30. RTL
+
+The entire page must support Arabic RTL.
+
+Do not hardcode left/right positioning.
+
+Use logical spacing and directional behavior.
+
+Icons such as back/forward must mirror correctly.
+
+---
+
+# 31. OUTPUT
+
+Create one high-fidelity desktop Student Details screen.
+
+Use the approved Admin App Shell.
+
+Show:
+
+* Student profile header
+* Identity
+* Access
+* Learning progress
+* Quiz activity
+* Certificates
+* Appropriate empty/available states
+* Clear hierarchy
+
+Do not create Student Edit.
+
+Do not create Course Details.
+
+Do not create Quiz Details.
+
+Those are separate screens.
+
+---
+
+# 32. FINAL RULE
+
+The source architecture defines these relevant domains:
+
+Identity
+Access
+Learning
+Quiz
+Certificates
+
+Use these domains to organize the UI.
+
+Do NOT expand the product.
+
+The AI is executing the existing product architecture.
+
+It is not allowed to invent new product functionality.
