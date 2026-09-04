@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Settings, Shield, Users, Lock, Key, Server, Smartphone,
   Check, AlertCircle, Save, Globe, Video, UserPlus, RefreshCw,
-  ChevronRight, ToggleLeft, ToggleRight
+  ChevronRight, ToggleLeft, ToggleRight, User, Laptop, Monitor,
+  Radio, Clock, AlertTriangle, LogOut
 } from "lucide-react";
+import PasswordOtpModal from "./settings/PasswordOtpModal";
 
 const C = {
   bg:       "#071225",
@@ -30,8 +32,41 @@ const INITIAL_ADMINS: AdminUser[] = [
   { id: "adm-3", name: "Sara Kamal", email: "sara.kamal@synapsemed.edu", role: "Operations Lead", status: "Active", lastLogin: "Yesterday" },
 ];
 
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<"security" | "admins" | "media" | "general">("security");
+interface ActiveSessionItem {
+  id: string;
+  device: string;
+  browser: string;
+  ip: string;
+  location: string;
+  lastActive: string;
+  isCurrent: boolean;
+}
+
+const INITIAL_SESSIONS: ActiveSessionItem[] = [
+  { id: "ses-1", device: "Desktop Workstation (Windows 11)", browser: "Chrome 128.0", ip: "197.38.120.45", location: "Cairo, Egypt", lastActive: "Active Now", isCurrent: true },
+  { id: "ses-2", device: "iPad Pro 12.9 (M2)", browser: "Safari Mobile 17.4", ip: "156.204.14.88", location: "Alexandria, Egypt", lastActive: "3 hours ago", isCurrent: false },
+  { id: "ses-3", device: "MacBook Pro 16", browser: "Chrome 127.0", ip: "197.45.89.201", location: "Giza, Egypt", lastActive: "Yesterday", isCurrent: false },
+];
+
+interface SettingsPageProps {
+  initialTab?: "profile" | "security" | "sessions" | "admins" | "media" | "general";
+  currentUser?: { name: string; email: string; role: string };
+}
+
+export default function SettingsPage({ initialTab = "security", currentUser }: SettingsPageProps) {
+  const [activeTab, setActiveTab] = useState<"profile" | "security" | "sessions" | "admins" | "media" | "general">(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  // Profile State
+  const [adminName, setAdminName] = useState(currentUser?.name || "Ahmed Admin");
+  const [adminEmail, setAdminEmail] = useState(currentUser?.email || "ahmed.admin@synapsemed.edu");
+  const [adminPhone, setAdminPhone] = useState("+20 100 123 4567");
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
 
   // Security Policies State
   const [maxDevices, setMaxDevices] = useState(3);
@@ -44,6 +79,50 @@ export default function SettingsPage() {
   const [bunnyTokenActive, setBunnyTokenActive] = useState(true);
   const [bunnySecurityKey, setBunnySecurityKey] = useState("••••••••••••••••••••••••••••••••");
 
+  // Sessions State
+  const [sessions, setSessions] = useState<ActiveSessionItem[]>(INITIAL_SESSIONS);
+  const [terminatedMessage, setTerminatedMessage] = useState<string | null>(null);
+
+  // Password Rotation & 2FA OTP State
+  const [currPassword, setCurrPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [showPasswordOtpModal, setShowPasswordOtpModal] = useState(false);
+
+  const handleRequestPasswordChange = () => {
+    setPasswordError(null);
+    setPasswordSuccess(null);
+    if (!currPassword) {
+      setPasswordError("Please enter your current administrative password.");
+      return;
+    }
+    if (!newPassword || newPassword.length < 8) {
+      setPasswordError("New master password must be at least 8 characters long.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New master password and confirmation password do not match.");
+      return;
+    }
+    if (newPassword === currPassword) {
+      setPasswordError("New password cannot be identical to the current password.");
+      return;
+    }
+    // Launch 2FA OTP verification modal
+    setShowPasswordOtpModal(true);
+  };
+
+  const handlePasswordOtpSuccess = () => {
+    setShowPasswordOtpModal(false);
+    setCurrPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordSuccess("Master administrative password successfully rotated and authorized via 2FA OTP!");
+    setTimeout(() => setPasswordSuccess(null), 5000);
+  };
+
   // Admins state
   const [admins, setAdmins] = useState<AdminUser[]>(INITIAL_ADMINS);
   const [isSaved, setIsSaved] = useState(false);
@@ -53,20 +132,37 @@ export default function SettingsPage() {
     setTimeout(() => setIsSaved(false), 2500);
   };
 
+  const handleTerminateOtherSessions = () => {
+    setSessions(prev => prev.filter(s => s.isCurrent));
+    setTerminatedMessage("All other remote administrative sessions have been revoked successfully.");
+    setTimeout(() => setTerminatedMessage(null), 3500);
+  };
+
+  const handleTerminateSingleSession = (id: string) => {
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
+
   return (
     <main style={{ flex: 1, overflowY: "auto", padding: "28px 32px 40px", background: C.bg }}>
       {/* ─── Breadcrumb & Title ─────────────────────────────────────────── */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: C.muted, marginBottom: 8 }}>
-          <span>System</span>
+          <span>Admin Console</span>
           <ChevronRight size={12} style={{ opacity: 0.5 }} />
           <span style={{ color: C.text, fontWeight: 600 }}>Settings</span>
         </div>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: C.text, margin: 0, lineHeight: 1.2 }}>System & Security Settings</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: C.text, margin: 0, lineHeight: 1.2 }}>
+              {activeTab === "profile" && "Administrator Profile & Credentials"}
+              {activeTab === "sessions" && "Active Sessions & DRM Device Concurrency"}
+              {activeTab === "security" && "System Security & Device Thresholds"}
+              {activeTab === "media" && "Bunny Stream DRM & CDN Configuration"}
+              {activeTab === "admins" && "Administrative Team & Roles"}
+              {activeTab === "general" && "Platform General Settings"}
+            </h1>
             <p style={{ fontSize: 13, color: C.muted, margin: "6px 0 0" }}>
-              Configure device concurrency thresholds, video token DRM encryption, and administrative team privileges.
+              Manage administrative credentials, concurrent hardware allowances, cryptographic tokens, and team access.
             </p>
           </div>
           <button
@@ -79,10 +175,12 @@ export default function SettingsPage() {
       </div>
 
       {/* ─── Tabs Navigation ────────────────────────────────────────────── */}
-      <div style={{ display: "flex", gap: 8, borderBottom: `1px solid ${C.border}`, marginBottom: 24, paddingBottom: 2 }}>
+      <div style={{ display: "flex", gap: 8, borderBottom: `1px solid ${C.border}`, marginBottom: 24, paddingBottom: 2, overflowX: "auto" }}>
         {[
+          { id: "profile",  label: "Administrator Profile", icon: User },
           { id: "security", label: "Security & Devices", icon: Shield },
-          { id: "media",    label: "Bunny Stream Video DRM", icon: Video },
+          { id: "sessions", label: "Active Sessions", icon: Monitor },
+          { id: "media",    label: "Bunny Stream DRM", icon: Video },
           { id: "admins",   label: "Admin Team & Roles", icon: Users },
           { id: "general",  label: "Platform General", icon: Globe },
         ].map(({ id, label, icon: Icon }) => (
@@ -103,6 +201,7 @@ export default function SettingsPage() {
               fontWeight: activeTab === id ? 700 : 500,
               cursor: "pointer",
               transition: "all 0.15s",
+              whiteSpace: "nowrap",
             }}
           >
             <Icon size={15} />
@@ -110,6 +209,175 @@ export default function SettingsPage() {
           </button>
         ))}
       </div>
+
+      {/* ─── TAB 0: Administrator Profile ──────────────────────────────── */}
+      {activeTab === "profile" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 900 }}>
+          {/* User Card */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "24px", display: "flex", alignItems: "center", gap: 20 }}>
+            <div style={{ width: 68, height: 68, borderRadius: "50%", background: `linear-gradient(135deg, ${C.cyan}33, ${C.cyan}66)`, border: `2px solid ${C.cyan}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, color: C.cyan, flexShrink: 0 }}>
+              AA
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: C.text, margin: 0 }}>{adminName}</h2>
+                <span style={{ padding: "3px 10px", borderRadius: 20, background: "rgba(53,224,223,0.12)", border: `1px solid rgba(53,224,223,0.3)`, color: C.cyan, fontSize: 11, fontWeight: 700 }}>
+                  SUPER ADMIN · FULL ROOT
+                </span>
+                <span style={{ padding: "3px 10px", borderRadius: 20, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80", fontSize: 11, fontWeight: 700 }}>
+                  2FA ACTIVE
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>
+                {adminEmail} · Synapse Med Platform Infrastructure & Security Division
+              </div>
+            </div>
+          </div>
+
+          {/* Account Details Form */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "24px" }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text, marginBottom: 16 }}>Personal & Contact Details</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>Full Name</label>
+                <input
+                  type="text"
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 14px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>Official Work Email</label>
+                <input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 14px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>Emergency Contact Mobile</label>
+                <input
+                  type="text"
+                  value={adminPhone}
+                  onChange={(e) => setAdminPhone(e.target.value)}
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 14px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>Academic Affiliation</label>
+                <input
+                  type="text"
+                  defaultValue="Faculty of Medicine · Synapse Academy"
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 14px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Change Password Card with mandatory 2FA OTP requirement */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: "24px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Key size={18} style={{ color: C.cyan }} />
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Administrative Password & Key Rotation</div>
+                  <div style={{ fontSize: 12, color: C.muted }}>Password updates strictly require 2FA One-Time Password (OTP) authorization.</div>
+                </div>
+              </div>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 20, background: "rgba(53,224,223,0.1)", border: `1px solid ${C.cyan}44`, fontSize: 11, fontWeight: 700, color: C.cyan }}>
+                <Shield size={12} /> 2FA OTP ENFORCED
+              </span>
+            </div>
+
+            {passwordError && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.3)", color: "#f87171", fontSize: 12, marginBottom: 16 }}>
+                <AlertTriangle size={15} />
+                <span>{passwordError}</span>
+              </div>
+            )}
+
+            {passwordSuccess && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "rgba(74,222,128,0.12)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80", fontSize: 12, fontWeight: 600, marginBottom: 16 }}>
+                <Check size={15} />
+                <span>{passwordSuccess}</span>
+              </div>
+            )}
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>Current Password</label>
+                <input
+                  type="password"
+                  value={currPassword}
+                  onChange={(e) => setCurrPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 12px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>New Master Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Min. 8 characters"
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 12px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.muted, marginBottom: 6 }}>Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm match"
+                  style={{ width: "100%", height: 40, background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 8, padding: "0 12px", fontSize: 13, color: C.text, outline: "none", boxSizing: "border-box" }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                onClick={handleRequestPasswordChange}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "9px 20px",
+                  borderRadius: 8,
+                  border: `1px solid ${C.cyan}55`,
+                  background: `linear-gradient(135deg, ${C.cyan} 0%, #1ab8b7 100%)`,
+                  color: "#050C1A",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  boxShadow: "0 4px 14px rgba(53,224,223,0.25)",
+                }}
+              >
+                <Shield size={14} />
+                <span>Rotate Master Password (Requires 2FA OTP)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 2FA OTP Modal for Password Rotation */}
+          <PasswordOtpModal
+            isOpen={showPasswordOtpModal}
+            adminEmail={adminEmail}
+            onClose={() => {
+              setShowPasswordOtpModal(false);
+              setPasswordError(null);
+            }}
+            onSuccess={handlePasswordOtpSuccess}
+            onError={(msg) => setPasswordError(msg)}
+          />
+        </div>
+      )}
+
 
       {/* ─── TAB 1: Security & Devices ──────────────────────────────────── */}
       {activeTab === "security" && (
@@ -176,7 +444,101 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ─── TAB 2: Bunny Stream DRM ────────────────────────────────────── */}
+      {/* ─── TAB 2: Sessions & Devices ──────────────────────────────────── */}
+      {activeTab === "sessions" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {terminatedMessage && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", borderRadius: 8, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.3)", color: "#4ade80", fontSize: 13, fontWeight: 600 }}>
+              <Check size={16} />
+              <span>{terminatedMessage}</span>
+            </div>
+          )}
+
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: "hidden" }}>
+            <div style={{ padding: "18px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Monitor size={18} style={{ color: C.cyan }} />
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Active Administrator Hardware Sessions</div>
+                  <div style={{ fontSize: 12, color: C.muted }}>Authorized devices currently authenticated to this account.</div>
+                </div>
+              </div>
+              <button
+                onClick={handleTerminateOtherSessions}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "7px 14px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(248,113,113,0.3)",
+                  background: "rgba(248,113,113,0.1)",
+                  color: "#f87171",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                <LogOut size={13} />
+                Terminate All Other Sessions
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {sessions.map((ses) => (
+                <div
+                  key={ses.id}
+                  style={{
+                    padding: "16px 24px",
+                    borderBottom: `1px solid ${C.border}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 16,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 8, background: C.elevated, display: "flex", alignItems: "center", justifyContent: "center", color: ses.isCurrent ? C.cyan : C.muted }}>
+                      <Laptop size={18} />
+                    </div>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{ses.device}</span>
+                        {ses.isCurrent && (
+                          <span style={{ padding: "2px 8px", borderRadius: 12, background: "rgba(53,224,223,0.15)", border: `1px solid ${C.cyan}44`, color: C.cyan, fontSize: 10, fontWeight: 700 }}>
+                            THIS DEVICE
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>
+                        {ses.browser} · IP: {ses.ip} · {ses.location}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: ses.isCurrent ? "#4ade80" : C.muted }}>{ses.lastActive}</div>
+                      <div style={{ fontSize: 11, color: "rgba(169,181,199,0.5)" }}>Encrypted TLS 1.3</div>
+                    </div>
+                    {!ses.isCurrent && (
+                      <button
+                        onClick={() => handleTerminateSingleSession(ses.id)}
+                        style={{ background: "transparent", border: "none", color: "#f87171", fontSize: 12, cursor: "pointer", padding: "4px 8px" }}
+                      >
+                        Revoke
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── TAB 3: Bunny Stream DRM ────────────────────────────────────── */}
       {activeTab === "media" && (
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px", display: "flex", flexDirection: "column", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, borderBottom: `1px solid ${C.border}`, paddingBottom: 16 }}>
@@ -209,7 +571,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ─── TAB 3: Admin Team & Roles ──────────────────────────────────── */}
+      {/* ─── TAB 4: Admin Team & Roles ──────────────────────────────────── */}
       {activeTab === "admins" && (
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
           <div style={{ padding: "18px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -256,7 +618,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ─── TAB 4: General Platform ────────────────────────────────────── */}
+      {/* ─── TAB 5: General Platform ────────────────────────────────────── */}
       {activeTab === "general" && (
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: "24px", display: "flex", flexDirection: "column", gap: 20 }}>
           <div>

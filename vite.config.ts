@@ -22,25 +22,10 @@ export default defineConfig({
     figmaAssetResolver(),
     react(),
     tailwindcss(),
-    dts({
-      tsconfigPath: './tsconfig.types.json',
-      include: ['src'],
-    }),
   ],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   assetsInclude: ['**/*.svg', '**/*.csv'],
   build: {
-    lib: {
-      entry: ['./src/index.ts'],
-      formats: ['es'],
-      cssFileName: 'style',
-    },
-    rollupOptions: {
-      output: {
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-        entryFileNames: '[name].js',
-      },
-    },
+    outDir: 'dist',
   },
 })
